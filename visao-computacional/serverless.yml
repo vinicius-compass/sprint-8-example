@@ -1,9 +1,35 @@
-service: vision
-frameworkVersion: '3'
+service: sprint-8-rekognition-service
+
+frameworkVersion: "3"
 
 provider:
   name: aws
-  runtime: python3.9
+  stage: prod
+  region: us-east-1
+  stackName: sprint-8-rekognition-service-stack
+  tags:
+    Name: rekognition-service
+    Project: rekognition-service
+    CostCenter: rekognition-service
+  stackTags:
+    Name: rekognition-service
+    Project: rekognition-service
+    CostCenter: rekognition-service
+  runtime: python3.11
+  iam:
+    role:
+      name: tts-service-lambda-role
+      statements:
+        - Effect: Allow
+          Action:
+            - s3:GetObject
+          Resource:
+            - "*"
+        - Effect: Allow
+          Action:
+            - rekognition:DetectLabels
+            - rekognition:DetectFaces
+          Resource: "*"
 
 functions:
   health:
@@ -24,3 +50,15 @@ functions:
       - httpApi:
           path: /v2
           method: get
+  v1:
+    handler: handler.v1
+    events:
+      - httpApi:
+          path: /v1/vision
+          method: post
+  v2:
+    handler: handler.v2
+    events:
+      - httpApi:
+          path: /v2/vision
+          method: post
